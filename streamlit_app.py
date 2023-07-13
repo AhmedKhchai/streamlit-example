@@ -1,38 +1,56 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-"""
-# Welcome to Streamlit!
+dataset_path = "datasets/election_2017.csv"
+# Load your data (adjust the path to your data file)
+df = pd.read_csv(dataset_path, sep=",", quotechar='"')
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+st.title("French Election Data Analysis")
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Print column names for debugging
+st.write(df.columns)
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+# Allow user to select a candidate
+candidates = [
+    "ARTHAUD",
+    "ROUSSEL",
+    "MACRON",
+    "LASSALLE",
+    "LE PEN",
+    "ZEMMOUR",
+    "MÉLENCHON",
+    "HIDALGO",
+    "JADOT",
+    "PÉCRESSE",
+    "POUTOU",
+    "DUPONT-AIGNAN",
+]
+candidate = st.selectbox("Select a candidate to view", candidates)
 
+# Show a histogram for selected candidate
+st.subheader("Histogram")
+fig, ax = plt.subplots()
+ax.hist(df[candidate], bins=20, color="blue", alpha=0.7)
+plt.xlabel("Votes")
+plt.ylabel("Count")
+plt.title(f"Distribution of votes for {candidate}")
+st.pyplot(fig)
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
+# Show abstention statistics
+st.subheader("Abstention statistics")
+st.write(df["Abstentions"].describe())
 
-    Point = namedtuple('Point', 'x y')
-    data = []
+# Show voter turnout statistics
+st.subheader("Voter turnout statistics")
+st.write(df["Votants"].describe())
 
-    points_per_turn = total_points / num_turns
-
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+# Show a scatter plot of abstention vs selected candidate
+st.subheader("Scatter plot: abstention vs selected candidate")
+fig, ax = plt.subplots()
+ax.scatter(df["Abstentions"], df[candidate], alpha=0.5)
+plt.xlabel("Abstentions")
+plt.ylabel("Votes")
+plt.title(f"Abstentions vs Votes for {candidate}")
+st.pyplot(fig)
